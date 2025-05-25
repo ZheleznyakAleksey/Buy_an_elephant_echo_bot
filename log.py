@@ -1,0 +1,44 @@
+import logging
+from logging.handlers import TimedRotatingFileHandler
+import os
+from datetime import datetime, time
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.WARNING)
+
+
+def start_logging():
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+
+    handler = TimedRotatingFileHandler(
+    filename='logs/log',
+    when='H',
+    interval=1,
+    atTime=time(1, 0),
+    backupCount=5,
+    encoding='utf-8'
+    )
+    handler.suffix = '%Y-%m-%d.log'
+    handler.setLevel(logging.WARNING)
+
+    formatter = logging.Formatter('%(asctime)s — %(levelname)s — %(message)s')
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+
+
+async def log_message(sender, user_id, message):
+    current_time = datetime.now()
+    formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = f'{formatted_time}: {sender} — {message}'
+
+    log_folder = 'message_history'
+
+    if not os.path.exists(log_folder):
+        os.makedirs(log_folder)
+
+    log_file_path = os.path.join(log_folder, f'user_{user_id}_chat_log.txt')
+    with open(log_file_path, 'a', encoding='utf-8') as log_file:
+        log_file.write(log_entry + '\n')

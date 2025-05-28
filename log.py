@@ -29,16 +29,23 @@ def start_logging():
     logger.addHandler(handler)
 
 
-async def log_message(sender, user_id, message):
+async def log_message(sender: str, user_id: int, message_type: str = None, message: str = None,
+                      image: str = None, caption: str = None, voice: str = None):
     current_time = datetime.now()
     formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S')
-    log_entry = f'{formatted_time}: {sender} — {message}'
+    
+    log_entry = f'{formatted_time} | {sender} | {message_type} | '
+    if message_type == 'IMAGE':
+        log_entry += f'{image} | {caption}'
+    elif message_type == 'VOICE':
+        log_entry += voice
+    else:
+        log_entry += message
+
 
     log_folder = 'message_history'
+    os.makedirs(log_folder, exist_ok=True)
 
-    if not os.path.exists(log_folder):
-        os.makedirs(log_folder)
-
-    log_file_path = os.path.join(log_folder, f'user_{user_id}_chat_log.txt')
+    log_file_path = os.path.join(log_folder, f'chat_{user_id}_log.txt')
     with open(log_file_path, 'a', encoding='utf-8') as log_file:
         log_file.write(log_entry + '\n')
